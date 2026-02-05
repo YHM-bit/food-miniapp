@@ -69,22 +69,20 @@ def default_filters() -> Dict[str, Any]:
 def get_user(db: Dict[str, Any], uid: int) -> Dict[str, Any]:
     suid = str(uid)
     if suid not in db["users"]:
-        created = now()
-        db["users"][suid] = {
-            "lang": "uk",
-            "tokens": 15,
-            "created_at": created.isoformat(),
-            "trial_until": (created + timedelta(days=TRIAL_DAYS)).isoformat(),
-            "last_bonus": "",
-            "filters": default_filters(),
-            "daily_choice": {},
-        }
-    u = db["users"][suid]
-    u.setdefault("lang","uk")
-    u.setdefault("tokens",15)
-    u.setdefault("filters", default_filters())
-    u.setdefault("daily_choice", {})
-    u.setdefault("last_bonus","")
+    created = now()
+    db["users"][suid] 
+    u.setdefault("daily_paid", "")
+            = {
+        "lang": "uk",
+        "tokens": 15,
+        "created_at": created.isoformat(),
+        "trial_until": (created + timedelta(days=TRIAL_DAYS)).isoformat(),
+        "last_bonus": "",
+        "filters": default_filters(),
+        "daily_choice": {},
+        "daily_paid": ""  
+    }
+
     return u
 
 def is_trial(u: Dict[str, Any]) -> bool:
@@ -271,16 +269,26 @@ def api_filters(payload: Dict[str, Any], x_telegram_init_data: str = Header(defa
 
 @app.post("/api/daily")
 def api_daily(x_telegram_init_data: str = Header(default="")):
-    user_id = uid(x_telegram_init_data)
-    db = load_db()
-    u = get_user(db, user_id)
-    apply_bonus(u)
-    if not charge(u, "daily"):
+    uid = uid_from_init(x_telegram_init_data)
+
+    with LOCK:
+        db = load_db()
+        u = get_user(db, uid)
+        apply_bonus(u)
+
+        
+        if not is_trial(u):
+            if u.get("daily_paid") != today():
+                if not charge(u, "daily"):
+                    save_db(db)
+                    raise HTTPException(402, "NO_TOKENS")
+                u["daily_paid"] = today()
+
+        dish = pick_daily(db, u)
         save_db(db)
-        raise HTTPException(402, "NO_TOKENS")
-    dish = pick_daily(db, u)
-    save_db(db)
+
     return {"ok": True, "dish": dish}
+
 
 @app.post("/api/action")
 def api_action(payload: Dict[str, Any], x_telegram_init_data: str = Header(default="")):

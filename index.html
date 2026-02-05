@@ -1,18 +1,554 @@
 <!doctype html>
-<html>
+<html lang="uk">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <title>Food Mini App</title>
+  <title>Cook Today</title>
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#121a24;
+      --card2:#0f1620;
+      --text:#e9eef5;
+      --muted:rgba(233,238,245,.72);
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.28);
+      --accent:#4da3ff;
+      --accent2:#7c5cff;
+      --good:#3ddc97;
+      --danger:#ff5c7a;
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 30% -10%, rgba(77,163,255,.25), transparent 60%),
+                  radial-gradient(900px 600px at 110% 10%, rgba(124,92,255,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{max-width:720px;margin:0 auto;padding:16px 14px 22px}
+    .top{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+      margin-bottom:12px;
+    }
+    .title{font-size:22px;font-weight:800;letter-spacing:.2px;margin:0}
+    .subtitle{margin:4px 0 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+    .pill{
+      flex:0 0 auto;
+      display:flex;flex-direction:column;gap:6px;
+      padding:10px 12px;border:1px solid var(--border);
+      border-radius:999px;background:rgba(255,255,255,.06);
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+      min-width:150px;
+    }
+    .pill .k{font-size:12px;color:var(--muted)}
+    .pill .v{font-size:14px;font-weight:800}
+
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .grid{display:grid;gap:12px}
+
+    .actions{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
+      padding:11px 10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .btn:hover{background: rgba(255,255,255,.09)}
+    .btn:active{transform: scale(.98)}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(77,163,255,.25), rgba(124,92,255,.22));
+      border-color: rgba(77,163,255,.35);
+    }
+
+    .dish{
+      padding:14px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.12);
+    }
+    .dish .name{font-size:18px;font-weight:900;margin:0 0 6px 0}
+    .dish .why{margin:0;color:var(--muted);font-size:13px;line-height:1.4}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--muted);
+    }
+    .chip.accent{
+      color:var(--text);
+      border-color: rgba(77,163,255,.35);
+      background: rgba(77,163,255,.12);
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background: rgba(255,255,255,.04);
+    }
+    .panel h3{margin:0 0 10px 0;font-size:14px}
+    .form{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px 2px}
+    select,input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.10);
+      color:var(--text);
+      outline:none;
+    }
+    option{color:#111}
+    .checks{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+    .chk{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+    .chk input{width:18px;height:18px}
+
+    .out{
+      margin-top:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.14);
+      border-radius:16px;
+      padding:12px;
+    }
+    .out .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .out .head b{font-size:13px}
+    pre{white-space:pre-wrap;margin:8px 0 0 0;color:var(--text);font-size:13px;line-height:1.45}
+
+    .footer{margin-top:14px;text-align:center;color:var(--muted);font-size:12px}
+
+    @media (max-width:520px){
+      .actions{grid-template-columns: repeat(2, minmax(0, 1fr));}
+      .form{grid-template-columns: 1fr;}
+      .pill{min-width:140px}
+    }
+
+    .fade-in{animation: fade .18s ease-out}
+    @keyframes fade{from{opacity:.3;transform:translateY(2px)}to{opacity:1;transform:translateY(0)}}
+  </style>
 </head>
-<body style="font-family:system-ui;margin:20px">
-  <h2>🍳 Food Mini App</h2>
-  <p>OK ✅ WebApp URL працює. Далі підключимо бекенд.</p>
-  <script>
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
-    tg?.expand();
-  </script>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 class="title" id="ui_title">Cook Today</h1>
+        <p class="subtitle" id="ui_subtitle">Daily food ideas with filters • ingredients • steps • time</p>
+      </div>
+      <div class="pill">
+        <div class="k" id="ui_status_k">Status</div>
+        <div class="v" id="status">Loading…</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="actions">
+          <button class="btn primary" id="btnDaily">🍽️ <span id="ui_daily">Страва дня</span></button>
+          <button class="btn" id="btnIng">🧾 <span id="ui_ing">Інгредієнти</span></button>
+          <button class="btn" id="btnSteps">👨‍🍳 <span id="ui_steps">Рецепт</span></button>
+          <button class="btn" id="btnTime">⏱ <span id="ui_time">Час</span></button>
+        </div>
+
+        <div id="dish" class="dish fade-in" style="display:none;margin-top:12px"></div>
+
+        <div id="out" class="out fade-in" style="display:none">
+          <div class="head">
+            <b id="outTitle"></b>
+            <span class="chip" id="outMeta" style="display:none"></span>
+          </div>
+          <pre id="outBody"></pre>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 id="ui_filters">⚙️ Фільтри</h3>
+
+        <div class="form">
+          <div class="field">
+            <label>🌏 <span id="ui_lang">Lang</span></label>
+            <select id="lang">
+              <option value="uk">uk</option>
+              <option value="hr">hr</option>
+              <option value="en">en</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label><span id="ui_diet">Diet</span></label>
+            <select id="diet">
+              <option value="any">any</option>
+              <option value="vegetarian">vegetarian</option>
+              <option value="vegan">vegan</option>
+              <option value="pescatarian">pescatarian</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label><span id="ui_max">Max time</span></label>
+            <select id="max_time">
+              <option value="0">∞</option>
+              <option value="15">15</option>
+              <option value="30">30</option>
+              <option value="45">45</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label><span id="ui_excl">Exclude (comma)</span></label>
+            <input id="exclude" placeholder="onion, garlic ..." />
+          </div>
+        </div>
+
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="gluten_free"> gluten_free</label>
+          <label class="chk"><input type="checkbox" id="lactose_free"> lactose_free</label>
+          <label class="chk"><input type="checkbox" id="high_protein"> high_protein</label>
+          <label class="chk"><input type="checkbox" id="low_calorie"> low_calorie</label>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="btnSave">💾 <span id="ui_save">Save</span></button>
+          <button class="btn" id="btnRefresh">🔄 <span id="ui_refresh">Refresh</span></button>
+        </div>
+      </div>
+
+      <div class="footer">@najednostavniji_receptibot</div>
+    </div>
+  </div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  tg?.ready();
+  tg?.expand();
+
+  // ---- Theme адаптація під Telegram ----
+  function applyTheme() {
+    const p = tg?.themeParams || {};
+    const scheme = tg?.colorScheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+    // Telegram theme params: bg_color, text_color, hint_color, button_color, button_text_color, secondary_bg_color...
+    const bg = p.bg_color || (scheme === "dark" ? "#0b0f14" : "#f6f7fb");
+    const text = p.text_color || (scheme === "dark" ? "#e9eef5" : "#0f172a");
+    const muted = p.hint_color || (scheme === "dark" ? "rgba(233,238,245,.72)" : "rgba(15,23,42,.70)");
+    const secondary = p.secondary_bg_color || (scheme === "dark" ? "#121a24" : "#ffffff");
+    const accent = p.button_color || "#4da3ff";
+
+    // Підбираємо карди/бордери під фон
+    const card = secondary;
+    const border = (scheme === "dark") ? "rgba(255,255,255,.10)" : "rgba(15,23,42,.10)";
+
+    document.documentElement.style.setProperty("--bg", bg);
+    document.documentElement.style.setProperty("--text", text);
+    document.documentElement.style.setProperty("--muted", muted);
+    document.documentElement.style.setProperty("--card", card);
+    document.documentElement.style.setProperty("--border", border);
+    document.documentElement.style.setProperty("--accent", accent);
+  }
+
+  applyTheme();
+  tg?.onEvent?.("themeChanged", applyTheme);
+
+  // ---- i18n ----
+  const I18N = {
+    uk: {
+      title:"Cook Today",
+      subtitle:"Щоденні ідеї їжі • фільтри • інгредієнти • рецепт • час",
+      statusK:"Статус",
+      daily:"Страва дня",
+      ing:"Інгредієнти",
+      steps:"Рецепт",
+      time:"Час",
+      filters:"⚙️ Фільтри",
+      lang:"Lang",
+      diet:"Diet",
+      max:"Max time",
+      excl:"Exclude (comma)",
+      save:"Save",
+      refresh:"Refresh",
+      out_ing:"🧾 Інгредієнти",
+      out_steps:"👨‍🍳 Кроки",
+      out_time:"⏱ Час",
+      no_tokens:"Немає токенів 😕",
+      no_match:"Немає страв під ці фільтри"
+    },
+    hr: {
+      title:"Cook Today",
+      subtitle:"Dnevne ideje • filteri • sastojci • recept • vrijeme",
+      statusK:"Status",
+      daily:"Jelo dana",
+      ing:"Sastojci",
+      steps:"Recept",
+      time:"Vrijeme",
+      filters:"⚙️ Filteri",
+      lang:"Jezik",
+      diet:"Dijeta",
+      max:"Max vrijeme",
+      excl:"Izbaci (zarez)",
+      save:"Spremi",
+      refresh:"Osvježi",
+      out_ing:"🧾 Sastojci",
+      out_steps:"👨‍🍳 Koraci",
+      out_time:"⏱ Vrijeme",
+      no_tokens:"Nema tokena 😕",
+      no_match:"Nema jela za ove filtere"
+    },
+    en: {
+      title:"Cook Today",
+      subtitle:"Daily ideas • filters • ingredients • steps • time",
+      statusK:"Status",
+      daily:"Dish of the day",
+      ing:"Ingredients",
+      steps:"Recipe",
+      time:"Time",
+      filters:"⚙️ Filters",
+      lang:"Lang",
+      diet:"Diet",
+      max:"Max time",
+      excl:"Exclude (comma)",
+      save:"Save",
+      refresh:"Refresh",
+      out_ing:"🧾 Ingredients",
+      out_steps:"👨‍🍳 Steps",
+      out_time:"⏱ Time",
+      no_tokens:"No tokens 😕",
+      no_match:"No dish matches filters"
+    }
+  };
+
+  function setUiLang(l){
+    const t = I18N[l] || I18N.uk;
+    document.getElementById("ui_title").textContent = t.title;
+    document.getElementById("ui_subtitle").textContent = t.subtitle;
+    document.getElementById("ui_status_k").textContent = t.statusK;
+    document.getElementById("ui_daily").textContent = t.daily;
+    document.getElementById("ui_ing").textContent = t.ing;
+    document.getElementById("ui_steps").textContent = t.steps;
+    document.getElementById("ui_time").textContent = t.time;
+    document.getElementById("ui_filters").textContent = t.filters;
+    document.getElementById("ui_lang").textContent = t.lang;
+    document.getElementById("ui_diet").textContent = t.diet;
+    document.getElementById("ui_max").textContent = t.max;
+    document.getElementById("ui_excl").textContent = t.excl;
+    document.getElementById("ui_save").textContent = t.save;
+    document.getElementById("ui_refresh").textContent = t.refresh;
+    document.title = t.title;
+  }
+
+  // ---- API helper ----
+  async function api(path, method="GET", body=null) {
+    const initData = tg?.initData || "";
+    const res = await fetch(path, {
+      method,
+      headers: {"Content-Type":"application/json","X-Telegram-Init-Data": initData},
+      body: body ? JSON.stringify(body) : null
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  function show(el, yes=true){ el.style.display = yes ? "block":"none"; }
+  function setStatus(s){ document.getElementById("status").textContent = s; }
+
+  function haptic(type="impact", style="light"){
+    try{
+      const h = tg?.HapticFeedback;
+      if(!h) return;
+      if(type==="impact") h.impactOccurred(style);
+      if(type==="success") h.notificationOccurred("success");
+      if(type==="error") h.notificationOccurred("error");
+    }catch(e){}
+  }
+
+  let CURRENT_LANG = "uk";
+  let CURRENT_DISH = null;
+
+  function renderDish(d) {
+    const box = document.getElementById("dish");
+    if (!d) { show(box,false); return; }
+    const tags = (d.tags || []).slice(0,6).map(x=>`<span class="chip">${x}</span>`).join("");
+    box.innerHTML = `
+      <div class="name">${d.title}</div>
+      <div class="row">
+        <span class="chip accent">⏱ ~${d.time_total_min} min</span>
+        ${tags}
+      </div>
+      <p class="why" style="margin-top:10px">${d.why || ""}</p>
+    `;
+    show(box,true);
+  }
+
+  function renderOut(title, data, meta=null) {
+    const out = document.getElementById("out");
+    const outTitle = document.getElementById("outTitle");
+    const outBody = document.getElementById("outBody");
+    const outMeta = document.getElementById("outMeta");
+
+    if (!data) { show(out,false); return; }
+    outTitle.textContent = title;
+    outBody.textContent = Array.isArray(data) ? data.map((x,i)=>`${i+1}. ${x}`).join("\n") : String(data);
+
+    if(meta){
+      outMeta.textContent = meta;
+      outMeta.style.display = "inline-flex";
+    } else {
+      outMeta.style.display = "none";
+    }
+    show(out,true);
+  }
+
+  async function refreshStatusAndForm() {
+    const s = await api("/api/status");
+    CURRENT_LANG = s.lang || "uk";
+    setUiLang(CURRENT_LANG);
+
+    // статус
+    setStatus(s.trial ? `🎁 Trial: ${s.trial_days_left} days` : `🪙 Tokens: ${s.tokens}`);
+
+    // форма
+    document.getElementById("lang").value = CURRENT_LANG;
+    const f = s.filters || {};
+    document.getElementById("diet").value = f.diet ?? "any";
+    document.getElementById("max_time").value = String(f.max_time ?? 0);
+    ["gluten_free","lactose_free","high_protein","low_calorie"].forEach(k=>{
+      document.getElementById(k).checked = !!f[k];
+    });
+    document.getElementById("exclude").value = (f.exclude||[]).join(", ");
+  }
+
+  // ---- Actions ----
+  async function loadDaily(auto=false){
+    try{
+      const r = await api("/api/daily","POST");
+      CURRENT_DISH = r.dish;
+      renderDish(r.dish);
+
+      const t = I18N[CURRENT_LANG] || I18N.uk;
+      if(!r.dish){
+        renderOut("", null);
+        tg?.showPopup?.({title:"Info", message:t.no_match, buttons:[{type:"ok"}]});
+      }else if(auto){
+        renderOut("", null);
+      }
+      haptic("success");
+      await refreshStatusAndForm();
+    }catch(e){
+      const t = I18N[CURRENT_LANG] || I18N.uk;
+      if(String(e.message).includes("NO_TOKENS")){
+        haptic("error");
+        tg?.showPopup?.({title:"Oops", message:t.no_tokens, buttons:[{type:"ok"}]});
+      }else{
+        alert("Daily error: " + e.message);
+      }
+      await refreshStatusAndForm();
+    }
+  }
+
+  async function loadAction(action){
+    try{
+      const r = await api("/api/action","POST",{action});
+      const t = I18N[CURRENT_LANG] || I18N.uk;
+
+      if(action==="ingredients") renderOut(t.out_ing, r.data, CURRENT_DISH ? CURRENT_DISH.title : null);
+      if(action==="steps") renderOut(t.out_steps, r.data, CURRENT_DISH ? CURRENT_DISH.title : null);
+      if(action==="time") renderOut(t.out_time, (r.data ?? 0) + " min", CURRENT_DISH ? CURRENT_DISH.title : null);
+
+      haptic("impact","light");
+      await refreshStatusAndForm();
+    }catch(e){
+      const t = I18N[CURRENT_LANG] || I18N.uk;
+      if(String(e.message).includes("NO_TOKENS")){
+        haptic("error");
+        tg?.showPopup?.({title:"Oops", message:t.no_tokens, buttons:[{type:"ok"}]});
+      }else{
+        alert("Error: " + e.message);
+      }
+      await refreshStatusAndForm();
+    }
+  }
+
+  // Buttons
+  document.getElementById("btnDaily").onclick = () => loadDaily(false);
+  document.getElementById("btnIng").onclick = () => loadAction("ingredients");
+  document.getElementById("btnSteps").onclick = () => loadAction("steps");
+  document.getElementById("btnTime").onclick = () => loadAction("time");
+
+  document.getElementById("btnSave").onclick = async () => {
+    const payload = {
+      diet: document.getElementById("diet").value,
+      max_time: parseInt(document.getElementById("max_time").value, 10),
+      gluten_free: document.getElementById("gluten_free").checked,
+      lactose_free: document.getElementById("lactose_free").checked,
+      high_protein: document.getElementById("high_protein").checked,
+      low_calorie: document.getElementById("low_calorie").checked,
+      exclude: document.getElementById("exclude").value.split(",").map(s=>s.trim()).filter(Boolean)
+    };
+    await api("/api/filters","POST",payload);
+    haptic("success");
+    await refreshStatusAndForm();
+    // після зміни фільтрів — підтягнемо актуальну страву
+    await loadDaily(true);
+  };
+
+  document.getElementById("btnRefresh").onclick = async () => {
+    await refreshStatusAndForm();
+    await loadDaily(true);
+  };
+
+  document.getElementById("lang").onchange = async () => {
+    const l = document.getElementById("lang").value;
+    await api("/api/lang","POST",{lang:l});
+    await refreshStatusAndForm();
+    await loadDaily(true);
+  };
+
+  // ---- Авто: при відкритті підвантажуємо страву дня ----
+  (async ()=>{
+    try{
+      await refreshStatusAndForm();
+      await loadDaily(true);
+    }catch(e){
+      alert("Open inside Telegram.\n" + e.message);
+    }
+  })();
+
+  // ---- Авто-оновлення після зміни дня (м’яко) ----
+  function msToNextLocalMidnight(){
+    const d = new Date();
+    const n = new Date(d);
+    n.setHours(24,0,0,0);
+    return n.getTime() - d.getTime();
+  }
+  setTimeout(()=>loadDaily(true), Math.max(5000, msToNextLocalMidnight() + 1500));
+</script>
 </body>
 </html>

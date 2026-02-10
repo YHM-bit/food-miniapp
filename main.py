@@ -68,22 +68,24 @@ def default_filters() -> Dict[str, Any]:
 
 def get_user(db: Dict[str, Any], uid: int) -> Dict[str, Any]:
     suid = str(uid)
-if suid not in db["users"]:
-    created = now()
-    db["users"][suid] 
-    u.setdefault("daily_paid", "")
-            = {
-        "lang": "uk",
-        "tokens": 15,
-        "created_at": created.isoformat(),
-        "trial_until": (created + timedelta(days=TRIAL_DAYS)).isoformat(),
-        "last_bonus": "",
-        "filters": default_filters(),
-        "daily_choice": {},
-        "daily_paid": ""  
-    }
 
+    if suid not in db["users"]:
+        created = now()
+        db["users"][suid] = {
+            "lang": "uk",
+            "tokens": 15,
+            "created_at": created.isoformat(),
+            "trial_until": (created + timedelta(days=TRIAL_DAYS)).isoformat(),
+            "last_bonus": "",
+            "filters": default_filters(),
+            "daily_choice": {},
+            "daily_paid": "",
+        }
+
+    u = db["users"][suid]
+    u.setdefault("daily_paid", "")
     return u
+
 
 def is_trial(u: Dict[str, Any]) -> bool:
     return now() < datetime.fromisoformat(u["trial_until"])

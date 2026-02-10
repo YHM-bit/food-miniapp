@@ -68,7 +68,7 @@ def default_filters() -> Dict[str, Any]:
 
 def get_user(db: Dict[str, Any], uid: int) -> Dict[str, Any]:
     suid = str(uid)
-    if suid not in db["users"]:
+if suid not in db["users"]:
     created = now()
     db["users"][suid] 
     u.setdefault("daily_paid", "")

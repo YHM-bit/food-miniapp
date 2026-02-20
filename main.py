@@ -33,13 +33,13 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def root():
-    # 1) Якщо є web/index.html
+    
     if os.path.exists("web/index.html"):
         return FileResponse("web/index.html")
-    # 2) Якщо є index.html в корені
+    
     if os.path.exists("index.html"):
         return FileResponse("index.html")
-    # 3) Якщо нема — покажемо текстом причину, щоб ти точно бачив
+    
     return HTMLResponse(
         "<h2>index.html not found</h2>"
         "<p>Expected: web/index.html or index.html</p>",

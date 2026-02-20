@@ -3,7 +3,7 @@ import telebot
 from telebot import types
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-WEBAPP_URL = os.environ.get("WEBAPP_URL")  # наприклад: https://food-miniapp-....onrender.com/
+WEBAPP_URL = os.environ.get("WEBAPP_URL")  
 
 if not BOT_TOKEN:
     raise RuntimeError("Set BOT_TOKEN env var.")

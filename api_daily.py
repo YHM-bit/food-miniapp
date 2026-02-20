@@ -6,7 +6,6 @@ def api_daily(x_telegram_init_data: str = Header(default="")):
         u = get_user(db, uid)
         apply_bonus(u)
 
-        # Після trial списуємо токени ТІЛЬКИ 1 раз на день
         if not is_trial(u):
             if u.get("daily_paid") != today():
                 if not charge(u, "daily"):

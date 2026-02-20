@@ -73,7 +73,7 @@
       padding:14px;
     }
 
-    /* Wallet-like big balance */
+    
     .balanceBlock{
       padding:18px 16px;
       border-radius: 22px;
@@ -112,7 +112,7 @@
       gap:8px;
     }
 
-    /* Action buttons like wallet */
+    
     .actionRow{
       display:grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
@@ -136,7 +136,7 @@
     .actionIcon{font-size:18px; display:block; margin-bottom:6px;}
     .actionSub{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
 
-    /* List items (wallet style) */
+    
     .list{
       display:flex;
       flex-direction:column;
@@ -171,11 +171,11 @@
     .itemDesc{font-size:12px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
     .chev{color:var(--muted); font-weight:900;}
 
-    /* Tabs content */
+    
     .tab{display:none;}
     .tab.active{display:block;}
 
-    /* Dish card */
+    
     .dish{
       margin-top:12px;
       border:1px solid var(--stroke);
@@ -200,7 +200,7 @@
     }
     .dishWhy{margin:10px 0 0 0; color:var(--muted); font-size:13px; line-height:1.45}
 
-    /* Content output */
+   
     .out{
       margin-top:12px;
       border:1px solid var(--stroke);
@@ -212,7 +212,7 @@
     .outTitle{font-weight:950; font-size:13px}
     pre{white-space:pre-wrap; margin:10px 0 0 0; font-size:13px; line-height:1.45}
 
-    /* Filters (as separate tab like wallet) */
+    
     .formGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -270,7 +270,7 @@
     }
     .btn:active{ transform: scale(.98); }
 
-    /* Bottom tab bar */
+    
     .tabbar{
       position:fixed;
       left:0; right:0; bottom:0;
@@ -466,10 +466,10 @@
         </div>
 
         <div class="checks">
-          <label class="chk"><input type="checkbox" id="gluten_free"> gluten_free</label>
-          <label class="chk"><input type="checkbox" id="lactose_free"> lactose_free</label>
-          <label class="chk"><input type="checkbox" id="high_protein"> high_protein</label>
-          <label class="chk"><input type="checkbox" id="low_calorie"> low_calorie</label>
+          <label class="chk"><input type="checkbox" id="Gluten free"> gluten_free</label>
+          <label class="chk"><input type="checkbox" id="Lactose free"> lactose_free</label>
+          <label class="chk"><input type="checkbox" id="High protein"> high_protein</label>
+          <label class="chk"><input type="checkbox" id="Low calorie"> low_calorie</label>
         </div>
 
         <div class="btnRow">
@@ -553,7 +553,7 @@
   tg?.ready();
   tg?.expand();
 
-  // ---------- THEME (Telegram dark/light) ----------
+  
   function isDarkByScheme(){
     return (tg?.colorScheme === "dark") || (window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
@@ -562,14 +562,14 @@
     const p = tg?.themeParams || {};
     const dark = isDarkByScheme();
 
-    // Telegram themeParams can be partial; fallback ensures readability
+   
     const bg = p.bg_color || (dark ? "#0b0f14" : "#f7f8fc");
     const text = p.text_color || (dark ? "#e9eef5" : "#0f172a");
     const muted = p.hint_color || (dark ? "rgba(233,238,245,.70)" : "rgba(15,23,42,.62)");
     const accent = p.button_color || (dark ? "#4da3ff" : "#2b7cff");
     const secondary = p.secondary_bg_color || (dark ? "#0b0f14" : "#ffffff");
 
-    // Make cards readable in both themes with "minimal unusual" glass background
+    
     const stroke = dark ? "rgba(255,255,255,.10)" : "rgba(15,23,42,.10)";
     const card = dark ? "rgba(255,255,255,.06)" : "rgba(15,23,42,.04)";
     const card2 = dark ? "rgba(255,255,255,.04)" : "rgba(15,23,42,.03)";
@@ -584,17 +584,17 @@
     document.documentElement.style.setProperty("--card2", card2);
     document.documentElement.style.setProperty("--accent", accent);
 
-    // Slightly different accent2 for light mode to keep "Blum-ish"
+    
     document.documentElement.style.setProperty("--accent2", dark ? "#7c5cff" : "#6a5cff");
 
-    // Optional: let Telegram main button style match accent
+    
     try { tg?.MainButton?.setParams({ color: accent }); } catch(e){}
   }
 
   applyTheme();
   try { tg?.onEvent?.("themeChanged", applyTheme); } catch(e){}
 
-  // ---------- i18n (UI text) ----------
+  
   const I18N = {
     uk: {
       uiTitle:"Najjednostavniji recepti",
@@ -806,7 +806,7 @@
     setText("wPricesD", t.pricesD);
   }
 
-  // ---------- API ----------
+  
   async function api(path, method="GET", body=null){
     const initData = tg?.initData || "";
     const res = await fetch(path, {
@@ -836,7 +836,7 @@
     }
   }
 
-  // ---------- Render ----------
+  
   function renderDish(dish){
     DISH = dish;
     const b1 = document.getElementById("dishBox");
@@ -881,7 +881,7 @@
     box.style.display = "block";
   }
 
-  // ---------- Status ----------
+
   function setStatusText(){
     if(!STATUS) return;
     const st = document.getElementById("statusText");
@@ -898,7 +898,7 @@
     const trial = STATUS.trial;
     const tokens = STATUS.tokens;
 
-    // Big number like wallet
+    
     document.getElementById("balV").textContent = trial ? "TRIAL" : String(tokens);
     document.getElementById("wV").textContent  = trial ? "TRIAL" : String(tokens);
 
@@ -916,7 +916,7 @@
     setStatusText();
     renderWalletNumbers();
 
-    // Fill filters form
+   
     document.getElementById("lang").value = LANG;
     const f = STATUS.filters || {};
     document.getElementById("diet").value = f.diet ?? "any";
@@ -927,7 +927,6 @@
     });
   }
 
-  // ---------- Actions ----------
   async function loadDaily(auto=false){
     const t = I18N[LANG] || I18N.uk;
     try{
@@ -972,7 +971,7 @@
     }
   }
 
-  // ---------- Tabs ----------
+  
   function setTab(name){
     ["home","recipe","filters","wallet"].forEach(x=>{
       document.getElementById("tab_"+x).classList.toggle("active", x===name);
@@ -985,7 +984,7 @@
     btn.addEventListener("click", ()=> setTab(btn.dataset.tab));
   });
 
-  // ---------- Wire UI ----------
+ 
   document.getElementById("btnDaily").onclick = ()=> loadDaily(false);
   document.getElementById("btnRecipe").onclick = ()=> setTab("recipe");
   document.getElementById("btnWallet").onclick = ()=> setTab("wallet");
@@ -1027,12 +1026,12 @@
     await loadDaily(true);
   };
 
-  // Wallet tab actions (placeholders)
+  
   document.getElementById("btnBuy").onclick = ()=>{
     showPopup("Buy tokens", "Зараз це заглушка.\nДалі підключимо оплату через Telegram Stars.");
   };
   document.getElementById("btnBonus").onclick = async ()=>{
-    // Bonus already начисляється в /api/status once per day (apply_bonus).
+    
     await refreshStatus();
     haptic("success");
     showPopup("Bonus", "Перевірив бонус ✅\nЯкщо сьогодні ще не було — він вже нарахований.");
@@ -1047,11 +1046,11 @@
     showPopup("Pricing", "Приклад:\n• Страва дня: 1\n• Інгредієнти: 1\n• Кроки: 2\n• Час: 1\n(можемо змінити як хочеш)");
   };
 
-  // ---------- Init ----------
+  
   (async ()=>{
     try{
       await refreshStatus();
-      // Авто підвантаження страви
+      
       await loadDaily(true);
     }catch(e){
       showPopup("Open inside Telegram", "Це Mini App. Відкрий через бот.\n" + e.message);
